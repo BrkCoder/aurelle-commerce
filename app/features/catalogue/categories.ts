@@ -2,24 +2,29 @@
 export const categories = [
   {
     slug: "rings",
+    /** Product whose styled photo represents the category on the homepage. */
+    cover: "lumiere-solitaire-ring",
     name: "Rings",
     sizeLabel: "Ring size",
     blurb: "Solitaires and bands, cut to be worn daily.",
   },
   {
     slug: "necklaces",
+    cover: "perle-riviere-necklace",
     name: "Necklaces",
     sizeLabel: "Length",
     blurb: "Fine chains and pendants with quiet presence.",
   },
   {
     slug: "earrings",
+    cover: "aurore-pearl-drop-earrings",
     name: "Earrings",
     sizeLabel: "Size",
     blurb: "Studs and drops that catch the light.",
   },
   {
     slug: "bracelets",
+    cover: "opale-sculpted-bangle",
     name: "Bracelets",
     sizeLabel: "Wrist size",
     blurb: "Sculpted gold and pearl for the wrist.",

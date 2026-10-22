@@ -1,10 +1,14 @@
 import type { CategorySlug } from "./categories";
 import type { MaterialSlug } from "./materials";
+import type { ImageSource } from "./product-images";
 
 export type Availability = "in-stock" | "low-stock" | "sold-out";
 
 export type CatalogueImage = {
+  /** Fallback `<img src>`. */
   url: string;
+  /** Modern formats offered through `<picture>`, best first. */
+  sources: ImageSource[];
   alt: string;
   width: number;
   height: number;

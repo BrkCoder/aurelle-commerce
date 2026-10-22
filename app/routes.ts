@@ -15,9 +15,4 @@ export default [
       route("*", "routes/not-found.tsx"),
     ]),
   ]),
-  // TEMPORARY: generated placeholder images (no layout; returns SVG).
-  route(
-    "placeholder/:category/:material/:view",
-    "routes/placeholder-image.tsx",
-  ),
 ] satisfies RouteConfig;

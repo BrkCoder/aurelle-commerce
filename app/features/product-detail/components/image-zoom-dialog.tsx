@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "~/components/ui/dialog";
-import type { CatalogueImage } from "~/features/catalogue";
+import { ProductPicture, type CatalogueImage } from "~/features/catalogue";
 import { cn } from "~/lib/utils";
 
 /**
@@ -67,12 +67,12 @@ export function ImageZoomDialog({
           tabIndex={0}
           className="max-h-[75svh] overflow-auto bg-sand"
         >
-          <img
+          <ProductPicture
             key={image.url}
-            src={image.url}
-            alt={image.alt}
-            width={image.width}
-            height={image.height}
+            image={image}
+            // Zoomed in, the image is ~200% of the dialog, so ask for the largest file.
+            sizes={zoomed ? "1800px" : "(min-width: 640px) 600px, 90vw"}
+            priority
             className={cn(
               "mx-auto h-auto transition-[width] duration-300 motion-reduce:transition-none",
               zoomed

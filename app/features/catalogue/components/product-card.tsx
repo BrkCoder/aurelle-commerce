@@ -6,6 +6,11 @@ import { cn } from "~/lib/utils";
 import { availabilityLabels } from "../availability";
 import type { ProductSummary } from "../catalogue.types";
 import { getMaterial } from "../materials";
+import { ProductPicture } from "./product-picture";
+
+/** Grid is 2 columns on phones, 3 beside the sidebar, 4 on wide screens. */
+const CARD_IMAGE_SIZES =
+  "(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, 46vw";
 
 function Badge({
   children,
@@ -44,28 +49,20 @@ export function ProductCard({
     <article className="group relative">
       <div className="relative aspect-[4/5] overflow-hidden bg-sand">
         {primary ? (
-          <img
-            src={primary.url}
-            alt={primary.alt}
-            width={primary.width}
-            height={primary.height}
-            sizes="(min-width: 1024px) 22vw, 46vw"
-            loading={priority ? "eager" : "lazy"}
-            fetchPriority={priority ? "high" : "auto"}
-            decoding="async"
+          <ProductPicture
+            image={primary}
+            sizes={CARD_IMAGE_SIZES}
+            priority={priority}
             className="absolute inset-0 size-full object-cover"
           />
         ) : null}
         {secondary ? (
           // Decorative alternate view: revealed on hover (pointer devices only).
-          <img
-            src={secondary.url}
+          <ProductPicture
+            image={secondary}
             alt=""
-            width={secondary.width}
-            height={secondary.height}
-            sizes="(min-width: 1024px) 22vw, 46vw"
-            loading="lazy"
-            decoding="async"
+            hoverOnly
+            sizes={CARD_IMAGE_SIZES}
             className="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-500 ease-luxe group-hover:opacity-100 motion-reduce:transition-none"
           />
         ) : null}

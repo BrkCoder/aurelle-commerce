@@ -46,6 +46,7 @@ npm run dev
 | `npm test`                                    | Vitest: unit, component and PGlite integration tests                                            |
 | `npm run test:e2e`                            | Playwright on Chromium, Firefox, WebKit, mobile Chrome and Safari, against the production build |
 | `npm run check`                               | typecheck, lint, format check, tests, build                                                     |
+| `npm run images:process`                      | Convert `incoming-images/` into optimised files in `public/images/products/`                    |
 | `npm run db:generate`                         | Generate a SQL migration from `app/db/schema.ts`                                                |
 | `npm run db:migrate` / `db:seed` / `db:setup` | Apply migrations / seed the catalogue / both (needs `DATABASE_URL`)                             |
 
@@ -81,9 +82,11 @@ e2e/                   Playwright specs
 docs/                  requirements, architecture, design system
 ```
 
-## Placeholders to replace
+## Product images
 
-Search for `TEMPORARY`. In short: product imagery is generated line-art served from `/placeholder/*` (no photography is hotlinked or licensed), and the homepage promises and delivery/returns copy are invented.
+Product photography is AI-generated (prompts in [docs/image-prompts.md](docs/image-prompts.md)); the fictional catalogue and brand are not real. Originals live in `incoming-images/<slug>/<1-3>.png` (git-ignored); `npm run images:process` converts them to AVIF (400, 800, 1200 and 1600 px wide) plus one 800 px WebP fallback in `public/images/products/` (about 15 MB for all 30 products), served through `<picture>`. Re-run it with `-- --force` after replacing a source image.
+
+Still `TEMPORARY`: the homepage promises and the delivery and returns copy are invented.
 
 ## Further reading
 

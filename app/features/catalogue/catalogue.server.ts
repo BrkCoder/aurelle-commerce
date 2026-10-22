@@ -161,6 +161,7 @@ async function toSummaries(
       .select({
         productId: productImages.productId,
         url: productImages.url,
+        sources: productImages.sources,
         alt: productImages.alt,
         width: productImages.width,
         height: productImages.height,
@@ -179,7 +180,13 @@ async function toSummaries(
     const variants = variantRows.filter((v) => v.productId === row.id);
     const images: CatalogueImage[] = imageRows
       .filter((i) => i.productId === row.id)
-      .map(({ url, alt, width, height }) => ({ url, alt, width, height }));
+      .map(({ url, sources, alt, width, height }) => ({
+        url,
+        sources,
+        alt,
+        width,
+        height,
+      }));
     return {
       id: row.id,
       slug: row.slug,
@@ -362,8 +369,9 @@ export async function getProductBySlug(
     description: product.description,
     gemstone: product.gemstone,
     specifications: product.specifications,
-    images: imageRows.map(({ url, alt, width, height }) => ({
+    images: imageRows.map(({ url, sources, alt, width, height }) => ({
       url,
+      sources,
       alt,
       width,
       height,

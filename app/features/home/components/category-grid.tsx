@@ -2,7 +2,8 @@ import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router";
 
 import { Container } from "~/components/container";
-import { categories, ProductImage } from "~/features/catalogue";
+import { categories, ProductPicture } from "~/features/catalogue";
+import { productImage } from "~/features/catalogue/product-images";
 
 export function CategoryGrid() {
   return (
@@ -14,7 +15,15 @@ export function CategoryGrid() {
         <ul className="mt-10 grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4 lg:gap-x-6">
           {categories.map((category) => (
             <li key={category.slug} className="group relative">
-              <ProductImage category={category.slug} />
+              <div className="aspect-[4/5] overflow-hidden bg-sand">
+                {/* Decorative: the link below names the category. */}
+                <ProductPicture
+                  image={productImage(category.cover, 3, "")}
+                  alt=""
+                  sizes="(min-width: 1024px) 22vw, 46vw"
+                  className="size-full object-cover transition-transform duration-700 ease-luxe group-hover:scale-[1.03] motion-reduce:transition-none"
+                />
+              </div>
               <div className="mt-4 flex items-start justify-between gap-2">
                 <div>
                   <h3 className="text-2xl">

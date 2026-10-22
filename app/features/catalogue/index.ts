@@ -13,7 +13,7 @@ export {
 export { FilterFields, FilterSheet } from "./components/catalogue-filters";
 export { ProductCard, ProductCardSkeleton } from "./components/product-card";
 export { ProductGrid, ProductGridSkeleton } from "./components/product-grid";
-export { ProductImage } from "./components/product-image";
+export { ProductPicture } from "./components/product-picture";
 export {
   getCatalogueHeading,
   PAGE_SIZE,

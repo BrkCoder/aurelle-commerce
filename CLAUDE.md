@@ -26,7 +26,8 @@ Luxury jewellery storefront. One React Router (framework mode, SSR) app. Docs: `
 - Animation is CSS (`animate-fade-up`). Never animate the LCP element. No animation library is installed.
 - Fonts are self-hosted (Fontsource). Do not add third-party stylesheets.
 - No inert controls: do not add Add to Bag / checkout buttons before the cart exists.
-- Placeholder content is marked `TEMPORARY` (placeholder images and route, homepage and policy copy). Remove when replaced.
+- Product photos: originals in `incoming-images/` (git-ignored), processed by `npm run images:process`. Render them with `ProductPicture` (AVIF `<source>` + fallback), never a bare `<img>`; file naming lives in `product-images.ts`. Hover-only images use `hoverOnly`.
+- Placeholder content is marked `TEMPORARY` (homepage promises and policy copy). Remove when replaced.
 - Never commit secrets. `.env` is git-ignored; document variables in `.env.example`.
 
 ## Gotchas (each cost real debugging time)

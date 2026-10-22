@@ -15,8 +15,20 @@ const product: ProductSummary = {
   currency: "USD",
   hasPriceRange: false,
   images: [
-    { url: "/a.svg", alt: "Test Ring, front view", width: 800, height: 1000 },
-    { url: "/b.svg", alt: "Test Ring, detail view", width: 800, height: 1000 },
+    {
+      sources: [],
+      url: "/a.svg",
+      alt: "Test Ring, front view",
+      width: 800,
+      height: 1000,
+    },
+    {
+      sources: [],
+      url: "/b.svg",
+      alt: "Test Ring, detail view",
+      width: 800,
+      height: 1000,
+    },
   ],
   materials: ["yellow-gold", "rose-gold"],
   availability: "in-stock",

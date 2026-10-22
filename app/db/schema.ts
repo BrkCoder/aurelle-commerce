@@ -17,6 +17,7 @@ import {
 // Relative imports: drizzle-kit loads this file without the `~` alias.
 import { categorySlugs } from "../features/catalogue/categories";
 import { materialSlugs } from "../features/catalogue/materials";
+import type { ImageSource } from "../features/catalogue/product-images";
 
 export const categoryEnum = pgEnum("category", categorySlugs);
 export const materialEnum = pgEnum("material", materialSlugs);
@@ -97,7 +98,13 @@ export const productImages = pgTable(
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
+    /** Fallback `<img src>`: the most widely supported format. */
     url: text("url").notNull(),
+    /** Modern-format alternatives for `<picture>`, best first (e.g. AVIF with a srcset). */
+    sources: jsonb("sources")
+      .$type<ImageSource[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     alt: text("alt").notNull(),
     width: integer("width").notNull(),
     height: integer("height").notNull(),

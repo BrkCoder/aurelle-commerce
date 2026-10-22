@@ -1,5 +1,5 @@
-import cormorant500 from "@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2?url";
 import inter from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import cormorant500 from "@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2?url";
 import {
   isRouteErrorResponse,
   Links,
@@ -13,7 +13,8 @@ import type { Route } from "./+types/root";
 import "./app.css";
 
 // Fonts are self-hosted (see app.css): no third-party origin and no render-blocking
-// stylesheet. Only the two files the first screen needs are preloaded.
+// stylesheet. Both fonts are preloaded: measured, dropping the body-font preload made the
+// first paint slower, because the file is otherwise only discovered after the CSS loads.
 const preloadFont = (href: string) => ({
   rel: "preload",
   href,

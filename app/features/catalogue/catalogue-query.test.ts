@@ -94,6 +94,12 @@ describe("parseCatalogueSearchParams", () => {
   });
 });
 
+describe("emptyQuery", () => {
+  it("equals what the parser returns for an empty URL", () => {
+    expect(emptyQuery).toEqual(parse(""));
+  });
+});
+
 describe("toSearchParams", () => {
   it("omits defaults", () => {
     expect(toSearchString(emptyQuery)).toBe("");

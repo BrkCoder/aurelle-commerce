@@ -64,7 +64,7 @@
 **Quality**
 
 - [x] Axe reports no WCAG 2 A/AA violations on home, catalogue (default, filtered, empty), product, sold-out product, 404 and the open dialogs, on five browser projects.
-- [x] Lighthouse accessibility 100, best practices 100, SEO 100. Performance 91 (catalogue), 95 (product), 89-92 (home) on a simulated slow-4G mobile profile.
+- [x] Lighthouse accessibility 100, best practices 100, SEO 100. Performance 90-91 (catalogue), 89-90 (product), 88 (home), with the real photography in place on a simulated slow-4G mobile profile.
 
 ### Later slices (summary)
 
@@ -75,7 +75,7 @@
 ## Assumptions
 
 - Single currency (USD), prices stored as integer cents with an explicit currency column.
-- Product photography is not yet available; generated line-art placeholders stand in and are marked `TEMPORARY`. One image set per product (not per metal).
+- Product photography is AI-generated, one set of three views per product, shot in the first listed metal (other metals are variants without their own photos).
 - Brand copy, delivery and returns promises are placeholders.
 - Brand and catalogue are fictional; the footer says so.
 - "New" means created within the last 60 days; "Low stock" means 3 or fewer units in total.

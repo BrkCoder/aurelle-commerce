@@ -83,6 +83,7 @@ export async function seedCatalogue(db: Db, now: Date = new Date()) {
           target: [productImages.productId, productImages.sortOrder],
           set: {
             url: sql`excluded.url`,
+            sources: sql`excluded.sources`,
             alt: sql`excluded.alt`,
             width: sql`excluded.width`,
             height: sql`excluded.height`,

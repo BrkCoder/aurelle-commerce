@@ -12,3 +12,6 @@
 /coverage/
 /playwright-report/
 /test-results/
+
+# Raw generated product photography (processed into optimised files before commit)
+/incoming-images/

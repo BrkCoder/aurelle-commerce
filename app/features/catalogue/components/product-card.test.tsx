@@ -3,6 +3,7 @@ import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 
 import type { ProductSummary } from "../catalogue.types";
+import { productImage } from "../product-images";
 import { ProductCard } from "./product-card";
 
 const base: ProductSummary = {
@@ -14,8 +15,20 @@ const base: ProductSummary = {
   currency: "USD",
   hasPriceRange: false,
   images: [
-    { url: "/a.svg", alt: "Test Ring, front view", width: 800, height: 1000 },
-    { url: "/b.svg", alt: "Test Ring, detail view", width: 800, height: 1000 },
+    {
+      sources: [],
+      url: "/a.svg",
+      alt: "Test Ring, front view",
+      width: 800,
+      height: 1000,
+    },
+    {
+      sources: [],
+      url: "/b.svg",
+      alt: "Test Ring, detail view",
+      width: 800,
+      height: 1000,
+    },
   ],
   materials: ["yellow-gold", "platinum"],
   availability: "in-stock",
@@ -61,6 +74,22 @@ describe("ProductCard", () => {
       screen.getByRole("img", { name: "Test Ring, front view" }),
     ).toBeInTheDocument();
     expect(screen.getAllByRole("img")).toHaveLength(1); // the alt="" hover image is presentational
+  });
+
+  it("offers AVIF at several widths through <picture>, with the plain image as fallback", () => {
+    const { container } = renderCard({
+      images: [productImage("test-ring", 1, "Test Ring, front view")],
+    });
+    const source = container.querySelector("picture source");
+    expect(source).toHaveAttribute("type", "image/avif");
+    expect(source?.getAttribute("srcset")).toContain(
+      "/images/products/test-ring/1-400.avif 400w",
+    );
+    expect(source?.getAttribute("srcset")).toContain("1-1600.avif 1600w");
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "src",
+      "/images/products/test-ring/1-800.webp",
+    );
   });
 
   it("loads eagerly only when marked as priority", () => {

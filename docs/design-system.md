@@ -83,4 +83,4 @@ Semantic roles (shadcn naming): `background`, `foreground`, `muted`, `muted-fore
 
 ## Imagery
 
-Product photography: soft natural light, neutral sand/ivory grounds, 4:5 portrait (800 × 1000 source), one subject per frame, three views per piece (front, detail, styled). Always set `width`, `height` and `sizes`, and `alt` text that names the piece and the view. Until photography arrives, generated line-art placeholders are served from `/placeholder/*` (marked `TEMPORARY`); `ProductImage` draws category art for the homepage tiles.
+Product photography: soft natural light, neutral sand/ivory grounds, 4:5 portrait (800 × 1000 source), one subject per frame, three views per piece (front, detail, styled). Always set `width`, `height` and `sizes`, and `alt` text that names the piece and the view. Photos are AI-generated (see `docs/image-prompts.md`), processed to AVIF with a WebP fallback and rendered through `ProductPicture`. Hover-only images are skipped on touch devices. Homepage category tiles use each category's styled photo; the hero uses the styled solitaire ring photo and is deliberately not animated (it is the largest paint on desktop).

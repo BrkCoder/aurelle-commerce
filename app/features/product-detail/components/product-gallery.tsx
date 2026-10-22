@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import { useRef, useState } from "react";
 
-import type { CatalogueImage } from "~/features/catalogue";
+import { ProductPicture, type CatalogueImage } from "~/features/catalogue";
 import { cn } from "~/lib/utils";
 
 import { ImageZoomDialog } from "./image-zoom-dialog";
@@ -60,17 +60,12 @@ export function ProductGallery({ images }: { images: CatalogueImage[] }) {
           aria-label={`Enlarge image: ${current.alt}`}
           className="group absolute inset-0 cursor-zoom-in"
         >
-          <img
+          <ProductPicture
             key={current.url}
-            src={current.url}
-            alt={current.alt}
-            width={current.width}
-            height={current.height}
+            image={current}
             sizes="(min-width: 1024px) 45vw, 100vw"
-            // The first image is the page's largest contentful paint.
-            loading="eager"
-            fetchPriority={index === 0 ? "high" : "auto"}
-            decoding="async"
+            // The main image is the page's largest contentful paint.
+            priority
             className="size-full animate-in object-cover duration-500 fade-in motion-reduce:animate-none"
           />
           <span className="absolute right-3 bottom-3 grid size-10 place-items-center bg-ivory/90 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
@@ -131,14 +126,10 @@ export function ProductGallery({ images }: { images: CatalogueImage[] }) {
                     : "border-transparent hover:border-mocha/50",
                 )}
               >
-                <img
-                  src={image.url}
+                <ProductPicture
+                  image={image}
                   alt=""
-                  width={image.width}
-                  height={image.height}
                   sizes="80px"
-                  loading="lazy"
-                  decoding="async"
                   className="size-full object-cover"
                 />
               </button>

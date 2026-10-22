@@ -1,11 +1,14 @@
 /**
  * Fictional catalogue used for development, demos and tests.
- * Product names, prices and copy are invented. Images are generated placeholders
- * (see features/catalogue/placeholder-art.ts), marked TEMPORARY.
+ * Product names, prices and copy are invented. Product images are AI-generated
+ * photography (prompts in docs/image-prompts.md), processed by `npm run images:process`.
  */
 import type { CategorySlug } from "../../features/catalogue/categories";
 import type { MaterialSlug } from "../../features/catalogue/materials";
-import { placeholderImageUrl } from "../../features/catalogue/placeholder-art";
+import {
+  imageViews,
+  productImage,
+} from "../../features/catalogue/product-images";
 import type { Specification } from "../schema";
 
 export const CURRENCY = "USD";
@@ -453,12 +456,6 @@ const materialMultiplier: Record<MaterialSlug, number> = {
 
 const AGE_STEP_DAYS = 8;
 
-const imageViews = [
-  { view: 1, label: "front view" },
-  { view: 2, label: "detail view" },
-  { view: 3, label: "styled view" },
-] as const;
-
 /** Deterministic pseudo-random int from a string, so the seed is stable across runs. */
 function hash(input: string): number {
   let h = 2166136261;
@@ -522,18 +519,9 @@ export function buildCatalogueSeed(now: Date) {
       }),
     );
 
-    const firstMaterial = seed.materials[0] ?? "yellow-gold";
-    const artSeed = hash(seed.slug) % 6;
+    // Each piece is photographed in its first listed metal; other metals are variants.
     const images = imageViews.map(({ view, label }) => ({
-      url: placeholderImageUrl({
-        category: seed.category,
-        material: firstMaterial,
-        view,
-        seed: artSeed,
-      }),
-      alt: `${seed.name}, ${label}`,
-      width: 800,
-      height: 1000,
+      ...productImage(seed.slug, view, `${seed.name}, ${label}`),
       sortOrder: view,
     }));
 

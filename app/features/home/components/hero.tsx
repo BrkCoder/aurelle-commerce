@@ -2,6 +2,8 @@ import { Link } from "react-router";
 
 import { Container } from "~/components/container";
 import { Button } from "~/components/ui/button";
+import { ProductPicture } from "~/features/catalogue";
+import { productImage } from "~/features/catalogue/product-images";
 
 /**
  * Entrance animation is plain CSS (`animate-fade-up`, see app.css), so it runs before
@@ -49,25 +51,18 @@ export function Hero() {
             </Button>
           </div>
         </div>
-        <div
-          aria-hidden="true"
-          className="relative mx-auto aspect-[4/5] w-full max-w-md animate-fade-up lg:max-w-none"
-          style={delay(0.1)}
-        >
-          {/* TEMPORARY: art-directed placeholder until campaign photography exists. */}
-          <div className="absolute inset-0 border border-champagne/40 bg-gradient-to-br from-champagne/40 via-sand to-ivory" />
-          <svg
-            viewBox="0 0 100 125"
-            className="absolute inset-0 size-full p-[18%] text-champagne-deep"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="0.4"
-          >
-            <circle cx="50" cy="78" r="26" />
-            <circle cx="50" cy="78" r="22" />
-            <path d="M38 46 50 28 62 46 50 56Z" />
-            <path d="M38 46h24M44 37l6 19 6-19" />
-          </svg>
+        {/* Not animated: on desktop this photo is the page's largest contentful paint. */}
+        <div className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden bg-sand lg:max-w-none">
+          <ProductPicture
+            image={productImage(
+              "lumiere-solitaire-ring",
+              3,
+              "A diamond solitaire ring in yellow gold on a travertine plinth",
+            )}
+            sizes="(min-width: 1024px) 42vw, 448px"
+            priority
+            className="size-full object-cover"
+          />
         </div>
       </Container>
     </section>

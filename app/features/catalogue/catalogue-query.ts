@@ -104,9 +104,18 @@ export function toSearchString(query: CatalogueQuery): string {
   return search ? `?${search}` : "";
 }
 
-export const emptyQuery: CatalogueQuery = parseCatalogueSearchParams(
-  new URLSearchParams(),
-);
+// A literal, not `parse(...)`: a module-level call would keep Zod in every bundle that
+// imports this feature, including pages that never parse a URL. A test pins it to the parser.
+export const emptyQuery: CatalogueQuery = {
+  categories: [],
+  collections: [],
+  materials: [],
+  inStock: false,
+  minPrice: undefined,
+  maxPrice: undefined,
+  sort: "featured",
+  page: 1,
+};
 
 // ---- Changing the query. Any change to what is shown returns to page 1. ----
 

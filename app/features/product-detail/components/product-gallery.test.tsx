@@ -7,7 +7,8 @@ import type { CatalogueImage } from "~/features/catalogue";
 import { ProductGallery } from "./product-gallery";
 
 const images: CatalogueImage[] = [1, 2, 3].map((n) => ({
-  url: `/img-${n}.svg`,
+  url: `/img-${n}.webp`,
+  sources: [],
   alt: `Ring, view ${n}`,
   width: 800,
   height: 1000,

@@ -27,8 +27,9 @@ Semantic roles (shadcn naming): `background`, `foreground`, `muted`, `muted-fore
 
 ## Typography
 
-- **Headings:** Cormorant Garamond (serif), weights 400-600, italic for emphasis. Tight tracking (`-0.01em`), balanced wrapping.
-- **Body/UI:** Inter 400/500.
+- **Headings:** Cormorant Garamond (serif), 400 and 500, italic 400 for emphasis. Tight tracking (`-0.01em`), balanced wrapping.
+- **Body/UI:** Inter (variable).
+- **Self-hosted** via Fontsource, latin subset, `font-display: swap`. The two files the first screen needs are preloaded. Do not add a third-party font stylesheet: it blocks rendering.
 - **Eyebrows, nav, buttons:** 12px, uppercase, `0.18em` tracking (hero eyebrow `0.32em`).
 - **Wordmark:** serif, uppercase, `0.32em` tracking.
 
@@ -44,23 +45,28 @@ Semantic roles (shadcn naming): `background`, `foreground`, `muted`, `muted-fore
 
 - Container: `max-w-360` (90rem), gutters `px-5` mobile, `px-10` ≥md.
 - Section rhythm: `mt-24` mobile, `mt-32` ≥md. Dark bands use `py-20`/`py-28`.
-- Grids: product/category 2 columns mobile, 4 ≥lg; gaps `gap-x-4 gap-y-10` (`lg:gap-x-6`).
+- Grids: category and related products 2 columns mobile, 4 ≥lg. Catalogue 2 / 3 (≥lg, beside the filter sidebar) / 4 (≥xl). Gaps `gap-x-4 gap-y-10` (`lg:gap-x-6`).
+- Catalogue: 15rem sticky filter sidebar ≥lg; below that, filters are a drawer.
 - Images: portrait `aspect-[4/5]`.
 - Corners are square by default; borders are hairline (`border` at 18% mocha).
 
 ## Components
 
 - **Button** (`components/ui/button.tsx`): `primary` (onyx), `outline`, `ghost`, `light`; sizes `default` (48px), `sm`, `icon` (44px touch target).
-- **Sheet** (`components/ui/sheet.tsx`): Radix Dialog, slides from the left.
+- **Sheet** (`components/ui/sheet.tsx`): Radix Dialog, slides from the left. Lay out long content as header / scrolling region / footer, not with `position: sticky`; make the scroll region `relative` so `sr-only` children are clipped by it.
+- **Dialog** (`components/ui/dialog.tsx`): centred modal (image zoom).
 - **StatusMessage:** shared empty / error / not-found block.
-- **Product card:** one stretched link (single tab stop), name serif, material muted, price medium.
+- **Breadcrumbs:** last crumb is plain text with `aria-current="page"`.
+- **Product card:** one stretched link (single tab stop); second image fades in on hover (pointer devices only); badges top-left from real data; "From" price when variants differ; metal swatches (with text for screen readers). Above-the-fold cards load eagerly.
+- **Filter controls:** square checkboxes (onyx when checked), 44px rows; chips are sand rectangles with a remove icon; pills (`All`, categories, collections) invert to onyx when active.
+- **Variant options:** links styled as buttons, `aria-current` on the selected one; sold-out options are struck through and labelled, never hidden.
 - Add further shadcn components with the CLI (`components.json` is configured), then restyle to these tokens.
 
 ## Interaction and motion
 
-- Durations: 300ms colour/hover, 700ms image scale, 800ms hero reveal. Easing `--ease-luxe` (`cubic-bezier(.22,1,.36,1)`).
-- Hover: colour shifts and subtle scale (≤105%). No bouncing, parallax or autoplay.
-- Motion library only for entrance sequences; `MotionConfig reducedMotion="user"` at the root. CSS animations honour a global `prefers-reduced-motion` override.
+- Durations: 200-300ms colour/hover, 500ms image crossfade, 700ms entrance (`animate-fade-up`). Easing `--ease-luxe` (`cubic-bezier(.22,1,.36,1)`).
+- Hover: colour shifts and subtle changes only. No bouncing, parallax or autoplay.
+- **CSS only.** Entrance animations are `animate-fade-up` with an inline `animation-delay`, so they run before JavaScript loads and never hide content from visitors without it. Never animate the largest contentful element (the hero headline is static). A global `prefers-reduced-motion` rule collapses all animation and transition durations; add `motion-reduce:` to transitions you define.
 - Loading: skeletons match final layout; route transitions show a thin champagne bar and a polite live-region message.
 
 ## Accessibility
@@ -69,9 +75,12 @@ Semantic roles (shadcn naming): `background`, `foreground`, `muted`, `muted-fore
 - Touch targets ≥44px.
 - Landmarks: skip link, `header`, labelled `nav`s, `main#main`, `footer`.
 - Icon-only controls carry `sr-only` labels; decorative SVGs are `aria-hidden`.
-- Modal menu: focus trap, Escape, focus return (Radix).
+- Modals (menu, filters, zoom): focus trap, Escape, focus return. Radix returns focus only to its own `Trigger`; when a separate button opens a controlled dialog, pass its ref and focus it in `onCloseAutoFocus`.
+- Heading order must not skip levels (give result lists an `sr-only` `h2`). Error pages need a `<title>`.
+- Image galleries use a radio group with a roving tab stop and arrow keys; the zoom region is keyboard-focusable and scrollable.
+- Option links expose the selected state with `aria-current`; stock changes are announced through a polite `role="status"`.
 - Don't convey meaning with colour alone.
 
 ## Imagery
 
-Product photography: soft natural light, neutral sand/ivory grounds, 4:5 portrait, one subject per frame. Until delivered, `ProductImage` renders line-art placeholders (marked `TEMPORARY`).
+Product photography: soft natural light, neutral sand/ivory grounds, 4:5 portrait (800 × 1000 source), one subject per frame, three views per piece (front, detail, styled). Always set `width`, `height` and `sizes`, and `alt` text that names the piece and the view. Until photography arrives, generated line-art placeholders are served from `/placeholder/*` (marked `TEMPORARY`); `ProductImage` draws category art for the homepage tiles.

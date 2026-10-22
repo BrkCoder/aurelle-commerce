@@ -4,74 +4,109 @@ One full-stack React Router (framework mode, SSR) application. No separate API s
 
 ## Stack
 
-React 19 · TypeScript (strict) · React Router 8 · Tailwind CSS v4 · shadcn/ui-style primitives on Radix · Motion · PostgreSQL + Drizzle ORM · Zod · Vitest + React Testing Library · Playwright.
+React 19 · TypeScript (strict) · React Router 8 · Tailwind CSS v4 · shadcn/ui-style primitives on Radix · PostgreSQL + Drizzle ORM · Zod · Vitest + React Testing Library · Playwright (+ axe).
 
 ## Layout
 
 ```
 app/
-  routes.ts            route table (layouts nest: shell > error boundary > pages)
-  routes/              thin route modules: loader/action + compose feature components
+  routes.ts            route table: shell layout > error boundary > pages
+  routes/              thin route modules: loader/action + composition
   features/<name>/     one folder per business capability
-    index.ts           PUBLIC client-safe API (components, types)
+    index.ts           PUBLIC client-safe API (components, types, pure logic)
     *.server.ts        server-only logic and data access
-    *.schema.ts        Zod schemas and inferred types
+    *.ts               pure domain logic (parsing, selection, availability)
     components/        feature UI (private; import via index.ts)
-  components/          shared, feature-agnostic UI (ui/ holds shadcn-style primitives)
-  db/                  Drizzle schema + lazy client (db.server.ts)
+  components/          shared, feature-agnostic UI (ui/ = shadcn-style primitives)
+  db/                  schema.ts, db.server.ts, demo-db.server.ts, seed/
   lib/                 pure helpers (cn, formatPrice)
+drizzle/               committed SQL migrations
 e2e/                   Playwright specs
-docs/                  PRD, architecture, design system
 ```
 
-### Current features
+### Features
 
-| Feature            | Responsibility                                                        |
-| ------------------ | --------------------------------------------------------------------- |
-| `catalogue`        | Product type, categories taxonomy, product card/image, server reads   |
-| `storefront-shell` | Layout, header, mobile menu, footer, navigation, route-transition cue |
-| `home`             | Homepage sections                                                     |
+| Feature            | Responsibility                                                                      |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| `catalogue`        | Taxonomy, URL query schema, SQL queries, variant/availability rules, cards, filters |
+| `product-detail`   | Gallery and zoom, variant selector, price/stock summary, specs, related products    |
+| `home`             | Homepage sections                                                                   |
+| `storefront-shell` | Layout, header, mobile menu, footer, navigation                                     |
 
 Planned: `cart`, `checkout`, `orders`, `wishlist`.
 
-## Boundaries (enforced where practical)
+## Boundaries
 
 - **Server-only code** lives in `*.server.ts`; React Router refuses to bundle it for the client.
-- **Features expose `index.ts`.** ESLint forbids importing `~/features/*/components/*` from outside; use the index or a `*.server.ts` file.
-- **Dependency direction:** `routes` → `features` → `components`/`lib`/`db`. Features may import another feature's public index (e.g. shell reads catalogue categories) but never its internals. Shared UI never imports features.
-- **Routes stay thin.** Business rules (pricing, totals, stock) live in feature `.server.ts` files, not in routes or components.
+- **Features expose `index.ts`.** ESLint forbids importing `~/features/*/components/*` from outside. Routes may also import a feature's `*.server.ts`.
+- **Direction:** `routes` → `features` → `components`/`lib`/`db`. A feature may use another feature's public index (`product-detail` uses `catalogue`), never its internals. Shared UI never imports features.
+- **Routes stay thin.** Business rules live in features: pricing and stock rules in `availability.ts` / `variants.ts`, queries in `catalogue.server.ts`.
+- **Queries take `db` as a parameter**, not a global. Tests run the same functions against an in-memory Postgres.
+
+## Data model
+
+```
+collections ─┐
+             ├─ product_collections ─┐
+             │                       ├─ products ─┬─ product_variants  (sku unique; material, size, price, stock)
+             │                       │            └─ product_images    (position unique per product)
+```
+
+- UUID primary keys; unique `products.slug`, `collections.slug`, `product_variants.sku`.
+- `category` and `material` are Postgres enums, mirrored from the static taxonomy in `features/catalogue`.
+- **Prices are integer minor units** (`price_cents`) with an explicit `currency` (`CHAR(3)`, checked against `^[A-Z]{3}$`). Formatting happens only at display (`formatPrice`).
+- Check constraints: positive price, non-negative stock, positive image dimensions, positive featured rank. `UNIQUE NULLS NOT DISTINCT (product, material, size)` stops duplicate one-size variants.
+- Indexes: `products(category)`, `(featured_rank)`, `(created_at)`; `product_variants(material)`, `(price_cents)` plus the unique `(product, material, size)`; `product_collections(collection_id)`.
+- **Migrations** are generated by drizzle-kit and committed in `drizzle/`. The seed is idempotent: it upserts on natural keys (slug, SKU, image position) and never rewrites `created_at`.
+
+### Database selection (`db.server.ts`)
+
+1. `DATABASE_URL` set: PostgreSQL via postgres-js.
+2. Otherwise, in development or with `AURELLE_DEMO_DB=1`: in-memory PGlite, migrated and seeded on first use.
+3. Otherwise: throw. A production deployment can never silently run on a throwaway database.
+
+PGlite is real Postgres (WASM), so the same migrations, enums, constraints and SQL run in tests and demos.
 
 ## Data flow
 
 ```
-Request → route loader (server) → feature .server.ts → seed data now / Drizzle later
-        → loader data → component render (SSR) → hydrate
-Mutation → <Form> → route action → Zod parse → feature .server.ts → redirect
+GET /catalogue?category=rings&sort=price-asc
+ → loader: Zod-parse the URL (invalid values fall back to defaults)
+ → countProducts(db, query)             awaited: needed to clamp / redirect the page
+ → listProductSummaries(db, query)      NOT awaited: streams into <Suspense> + skeleton
+ → render
 ```
 
-- **Reads** use loaders; **writes** use actions with plain `<Form>`s, so they work without JS.
-- **URL is the state** for search, sort, filter and pagination. No global state library.
-- **Untrusted input** (query params, form data, cookies) is parsed with Zod at the route boundary.
-- **Money** is integer cents everywhere; formatted only at display.
-- **Streaming:** the homepage loader returns the products promise un-awaited; `<Suspense>` + `<Await>` show a skeleton, with an in-place error fallback.
+- **The URL is the state** for filters, sort and page. No client store.
+- **Filtering, sorting and pagination run in SQL.** A request reads one page (12 rows) plus two batched queries for those rows' images and variants (no N+1). The browser never receives the full catalogue.
+- **Variant-level filters apply to one variant.** "Rose gold + in stock + under $2,000" means a single variant satisfies all three, not that each is true of some variant. The card's "From" price is the cheapest _matching_ variant, and price sorting uses the same value.
+- **Deterministic paging.** Every sort ends in the unique `slug`, so pages never overlap or skip.
+- **Canonical URLs.** A page past the end, or an unknown collection, redirects to the nearest valid URL. Other invalid params are ignored.
+- **Variant choice is the URL too** (`?material=&size=`) on the product page: shareable, refresh-safe, works as plain links, no local state. `shouldRevalidate` skips the loader when only the query string changes.
+
+### Rapid filter changes (`use-catalogue-query.ts`)
+
+React Router exposes a pending navigation only after React re-renders. Two clicks in the same tick would both build on the old URL and the second would drop the first, and a controlled checkbox would flicker back for a frame. So the _requested_ URL is held in a tiny external store (`useSyncExternalStore`) until its navigation settles. Handlers pass an updater (`goTo(q => toggle(q, …))`) applied to the latest request, and every control reads the same value. An e2e test fires four filter clicks in a single tick and asserts all four reach the URL.
 
 ## Key tradeoffs
 
-| Decision                                     | Why                                                                              | Cost / revisit when                                                            |
-| -------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Seed data behind a `.server.ts` function     | Ships UI now; swapping to Drizzle changes one file                               | Delete `seed-data.server.ts` in the catalogue slice                            |
-| Drizzle schema present but unused            | Fixes the data model early; `db:generate` ready                                  | Schema duplicates the Zod shape; consider `drizzle-zod` once more tables exist |
-| Error boundary on a nested pathless route    | A boundary replaces its own route; nesting keeps header/footer visible on errors | One extra route file                                                           |
-| ESLint 9 (not 10)                            | `eslint-plugin-jsx-a11y` does not yet support 10; a11y linting is a requirement  | Upgrade when the plugin does                                                   |
-| TypeScript 5.9 (not 7)                       | 7 is a native rewrite; typescript-eslint support is not settled                  | Revisit after tooling catches up                                               |
-| Google Fonts via `<link>`                    | Matches scaffold, zero setup                                                     | Self-host (`@fontsource`) for privacy and fewer origins                        |
-| Motion for hero reveal only                  | Restrained by design; CSS handles hover/transition                               | Add per-need, never decoratively                                               |
-| Placeholder links (`/catalogue`, `/cart`, …) | Navigation is final; targets return the styled 404 until their slice lands       | Resolved by the next slice                                                     |
-| Vitest config separate from `vite.config.ts` | React Router's Vite plugin is not wanted in unit tests                           | None                                                                           |
+| Decision                                                 | Why                                                                                                               | Cost / revisit when                                                                                                                                                                           |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PGlite for demo and tests, Postgres for production       | Zero-setup, hermetic, real Postgres semantics                                                                     | Demo data is ephemeral. Switch the demo to a local Postgres if persistence is wanted                                                                                                          |
+| Offset pagination (`page=N`)                             | Simple, shareable, supports "page 3 of 5"                                                                         | Offset cost grows on very large catalogues: move to keyset paging                                                                                                                             |
+| Filters need JavaScript                                  | Instant, consistent UI from one state source                                                                      | A no-JS fallback would be a GET form. Sort, pagination, categories and variant options already work as plain links                                                                            |
+| Static taxonomy (categories, materials) + DB collections | Categories and metals change rarely and drive enums and UI; collections are editorial and live in the DB          | Enum changes need a migration                                                                                                                                                                 |
+| Placeholder SVG images generated from the URL            | No hotlinking or licensing; deterministic and cacheable                                                           | Delete `placeholder-art.ts` and the route when real photography arrives. Real images should go through an image CDN (AVIF/WebP, `srcset`); the markup already sets `width`, `height`, `sizes` |
+| Self-hosted fonts (Fontsource, latin subset)             | Removed a render-blocking third-party stylesheet (~1 s on Lighthouse's slow-4G profile)                           | Non-latin text would need extra subsets                                                                                                                                                       |
+| CSS animation, no animation library                      | The hero's Motion reveal server-rendered the LCP headline at `opacity: 0` until hydration, and cost ~130 KB of JS | Reach for Motion only for things CSS cannot do (shared-element or layout transitions)                                                                                                         |
+| Error boundary on a nested pathless route                | A boundary replaces its own route; nesting keeps header/footer visible                                            | One extra route file                                                                                                                                                                          |
+| ESLint 9, TypeScript 5.9                                 | jsx-a11y lacks ESLint 10 support; TS 7 tooling not settled                                                        | Revisit                                                                                                                                                                                       |
+| Related products = same category or shared collection    | Cheap and explainable                                                                                             | Not "recommendations": that is deferred                                                                                                                                                       |
 
 ## Testing strategy
 
-- **Unit:** pure logic, Zod schemas, server functions (`*.test.ts`).
-- **Component:** React Testing Library for behaviour and accessibility roles (`*.test.tsx`).
-- **E2E:** Playwright against the production build, desktop and mobile projects (`e2e/`).
-- Prefer role/label queries over test ids.
+- **Unit:** pure logic: URL parsing and round-tripping, active filters, variant selection, availability, price formatting, palette contrast.
+- **Integration** (`*.integration.test.ts`, Node env): real migrations and seed on PGlite. Filter results are checked against an independent plain-JS oracle over the seed data; also sort order, pagination (no overlap or gaps), constraints, idempotent seeding, SQL-injection-shaped slugs.
+- **Component:** React Testing Library for roles, keyboard behaviour and focus management.
+- **E2E:** Playwright against the production build on Chromium, Firefox, WebKit, mobile Chrome and mobile Safari. Includes axe (WCAG 2 A/AA, 2.1 A/AA) on every page type plus open dialogs.
+- Prefer role/label queries over test ids. Tests that interact before hydration must wait for it (`networkidle`).

@@ -1,4 +1,5 @@
-import { MotionConfig } from "motion/react";
+import cormorant500 from "@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2?url";
+import inter from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
 import {
   isRouteErrorResponse,
   Links,
@@ -11,17 +12,19 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 
+// Fonts are self-hosted (see app.css): no third-party origin and no render-blocking
+// stylesheet. Only the two files the first screen needs are preloaded.
+const preloadFont = (href: string) => ({
+  rel: "preload",
+  href,
+  as: "font",
+  type: "font/woff2",
+  crossOrigin: "anonymous" as const,
+});
+
 export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500&display=swap",
-  },
+  preloadFont(cormorant500),
+  preloadFont(inter),
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -44,12 +47,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  // "user" honours the OS reduced-motion setting for every Motion animation.
-  return (
-    <MotionConfig reducedMotion="user">
-      <Outlet />
-    </MotionConfig>
-  );
+  return <Outlet />;
 }
 
 /** Last-resort boundary; storefront routes handle their own errors with the shell intact. */
@@ -71,6 +69,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
   return (
     <main className="mx-auto max-w-2xl px-5 py-24 text-center">
+      <title>{`${message} | Aurelle`}</title>
       <h1 className="text-5xl">{message}</h1>
       <p className="mt-4 text-muted-foreground">{details}</p>
       <a

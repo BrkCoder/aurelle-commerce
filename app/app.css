@@ -1,3 +1,9 @@
+/* Self-hosted fonts, latin subset only (font-display: swap is set by Fontsource). */
+@import "@fontsource/cormorant-garamond/latin-400.css";
+@import "@fontsource/cormorant-garamond/latin-500.css";
+@import "@fontsource/cormorant-garamond/latin-400-italic.css";
+@import "@fontsource-variable/inter/wght.css";
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -30,7 +36,7 @@
 
   /* Typography */
   --font-serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
 
   /* Motion */
   --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);

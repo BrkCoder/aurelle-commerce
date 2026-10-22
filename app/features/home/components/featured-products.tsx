@@ -6,10 +6,10 @@ import { Button } from "~/components/ui/button";
 import {
   ProductCard,
   ProductCardSkeleton,
-  type Product,
+  type ProductSummary,
 } from "~/features/catalogue";
 
-export function FeaturedProducts({ products }: { products: Product[] }) {
+export function FeaturedProducts({ products }: { products: ProductSummary[] }) {
   return (
     <section aria-labelledby="featured-heading" className="mt-24 md:mt-32">
       <Container>
@@ -37,9 +37,9 @@ export function FeaturedProducts({ products }: { products: Product[] }) {
           </StatusMessage>
         ) : (
           <ul className="mt-10 grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4 lg:gap-x-6">
-            {products.map((product) => (
+            {products.map((product, index) => (
               <li key={product.id}>
-                <ProductCard product={product} />
+                <ProductCard product={product} priority={index < 4} />
               </li>
             ))}
           </ul>

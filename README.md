@@ -1,87 +1,93 @@
-# Welcome to React Router!
+# Aurelle
 
-A modern, production-ready template for building full-stack React applications using React Router.
+A premium fine-jewellery storefront. _Discover Luxury. Experience Elegance._
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+Built as one full-stack **React Router** application (framework mode, SSR) with TypeScript (strict), Tailwind CSS v4, PostgreSQL + Drizzle ORM and Zod. The brand and catalogue are fictional.
 
-## Features
+## Status
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+| Phase | Scope                                                                       | State       |
+| ----- | --------------------------------------------------------------------------- | ----------- |
+| 1     | Storefront shell, homepage, tooling                                         | Done        |
+| 2     | Database-backed catalogue (filters, sorting, pagination) and product detail | Done        |
+| 3     | Cart, guest checkout, order confirmation, wishlist                          | Not started |
 
-## Getting Started
-
-### Installation
-
-Install the dependencies:
+## Quick start
 
 ```bash
 npm install
+npm run dev          # http://localhost:5173
 ```
 
-### Development
+With no `DATABASE_URL`, the app runs on an **in-memory demo database**: real PostgreSQL (PGlite, compiled to WASM) with the real migrations applied and the 30-product catalogue seeded on first request. Data resets on restart. That is enough to explore and test everything built so far.
 
-Start the development server with HMR:
+### Using a real PostgreSQL
 
 ```bash
+cp .env.example .env          # set DATABASE_URL
+npm run db:setup              # apply migrations, then seed (idempotent)
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+| Variable          | Purpose                                                                                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`    | PostgreSQL connection string. When set it always wins.                                                                                                           |
+| `AURELLE_DEMO_DB` | Set to `1` to allow the in-memory database in a production build. Unset, a production build without `DATABASE_URL` refuses to start. Used by the Playwright run. |
 
-## Building for Production
+## Scripts
 
-Create a production build:
+| Command                                       | What it does                                                                                    |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `npm run dev`                                 | Dev server with HMR                                                                             |
+| `npm run build` / `npm start`                 | Production build / serve it                                                                     |
+| `npm run typecheck`                           | Route typegen + `tsc` (strict)                                                                  |
+| `npm run lint`                                | ESLint (type-aware, jsx-a11y, feature-boundary rule)                                            |
+| `npm run format` / `format:check`             | Prettier                                                                                        |
+| `npm test`                                    | Vitest: unit, component and PGlite integration tests                                            |
+| `npm run test:e2e`                            | Playwright on Chromium, Firefox, WebKit, mobile Chrome and Safari, against the production build |
+| `npm run check`                               | typecheck, lint, format check, tests, build                                                     |
+| `npm run db:generate`                         | Generate a SQL migration from `app/db/schema.ts`                                                |
+| `npm run db:migrate` / `db:seed` / `db:setup` | Apply migrations / seed the catalogue / both (needs `DATABASE_URL`)                             |
 
-```bash
-npm run build
-```
+First-time e2e setup: `npx playwright install chromium firefox webkit`.
 
-## Deployment
+## What is built
 
-### Docker Deployment
+- **Storefront shell:** responsive header, accessible mobile menu, footer, skip link, route-transition indicator.
+- **Homepage:** hero, category grid, signature pieces (streamed behind a skeleton), brand story.
+- **Catalogue** (`/catalogue`): server-side filtering by category, collection, material, availability and price; four sort orders; 12 per page. All state lives in the URL, so it survives refresh, Back/Forward and sharing. Active filters are removable chips with a single "Reset filters". Filters are a sidebar on desktop and a drawer on mobile.
+- **Product detail** (`/products/:slug`): gallery with keyboard navigation and an accessible zoom dialog, variant selection (metal and size) driven by real variant rows with per-variant price and stock, specifications, delivery and returns, related products, breadcrumbs.
+- **States:** skeletons, empty states, in-shell error and 404 pages (with real HTTP statuses).
 
-To build and run using Docker:
+Not built yet: cart, checkout, accounts, wishlist, search. There is deliberately no "Add to bag" control until the cart exists.
 
-```bash
-docker build -t my-app .
+## Project layout
 
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
+See [docs/architecture.md](docs/architecture.md) for boundaries, data flow and tradeoffs.
 
 ```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
+app/
+  routes/              thin route modules (loaders, composition)
+  features/
+    catalogue/         taxonomy, URL query parsing, server queries, cards, filters
+    product-detail/    gallery, variant selector, product information
+    home/              homepage sections
+    storefront-shell/  layout, header, mobile menu, footer
+  components/          shared UI (shadcn-style primitives in ui/)
+  db/                  Drizzle schema, DB client, seed
+  lib/                 pure helpers
+drizzle/               generated SQL migrations (committed)
+e2e/                   Playwright specs
+docs/                  requirements, architecture, design system
 ```
 
-## Styling
+## Placeholders to replace
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+Search for `TEMPORARY`. In short: product imagery is generated line-art served from `/placeholder/*` (no photography is hotlinked or licensed), and the homepage promises and delivery/returns copy are invented.
 
----
+## Further reading
 
-Built with ❤️ using React Router.
+- [docs/product-requirements.md](docs/product-requirements.md)
+- [docs/architecture.md](docs/architecture.md)
+- [docs/design-system.md](docs/design-system.md)
+- [CLAUDE.md](CLAUDE.md): conventions for working in this repository

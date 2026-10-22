@@ -21,6 +21,12 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
   return (
     <Container>
+      {/* Route meta does not run for error boundaries; React hoists this into <head>. */}
+      <title>
+        {notFound
+          ? "Page not found | Aurelle"
+          : "Something went wrong | Aurelle"}
+      </title>
       <StatusMessage
         eyebrow={notFound ? "Error 404" : "Something went wrong"}
         title={notFound ? "This page has slipped away" : "We hit a snag"}

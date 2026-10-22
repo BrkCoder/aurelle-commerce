@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Await } from "react-router";
 
 import { StatusMessage } from "~/components/status-message";
+import { getDb } from "~/db/db.server";
 import { getFeaturedProducts } from "~/features/catalogue/catalogue.server";
 import {
   BrandStory,
@@ -26,7 +27,7 @@ export function meta(_args: Route.MetaArgs) {
 
 export function loader() {
   // Not awaited: the hero and categories render immediately while products stream in.
-  return { featured: getFeaturedProducts() };
+  return { featured: getDb().then((db) => getFeaturedProducts(db)) };
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {

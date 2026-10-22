@@ -2,22 +2,28 @@ import { render, screen } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 
-import type { Product } from "~/features/catalogue";
+import type { ProductSummary } from "~/features/catalogue";
 
 import { FeaturedProducts } from "./featured-products";
 
-const product: Product = {
+const product: ProductSummary = {
   id: "t-1",
   slug: "test-ring",
   name: "Test Ring",
   category: "rings",
-  material: "18k gold",
-  priceCents: 120000,
-  description: "A test ring.",
-  featured: true,
+  fromPriceCents: 120000,
+  currency: "USD",
+  hasPriceRange: false,
+  images: [
+    { url: "/a.svg", alt: "Test Ring, front view", width: 800, height: 1000 },
+    { url: "/b.svg", alt: "Test Ring, detail view", width: 800, height: 1000 },
+  ],
+  materials: ["yellow-gold", "rose-gold"],
+  availability: "in-stock",
+  isNew: false,
 };
 
-function renderWith(products: Product[]) {
+function renderWith(products: ProductSummary[]) {
   const Stub = createRoutesStub([
     { path: "/", Component: () => <FeaturedProducts products={products} /> },
   ]);

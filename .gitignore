@@ -1,0 +1,14 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+/node_modules/
+
+# React Router
+/.react-router/
+/build/
+
+# Tooling output
+/coverage/
+/playwright-report/
+/test-results/

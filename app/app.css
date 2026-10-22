@@ -1,0 +1,96 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * Aurelle design tokens. Documented in docs/design-system.md.
+ * Brand palette first, then semantic roles (shadcn/ui naming) that components use.
+ */
+@theme {
+  /* Brand palette */
+  --color-ivory: #faf7f2;
+  --color-sand: #e8dfd2;
+  --color-champagne: #b69a73;
+  --color-mocha: #4a3b35;
+  --color-onyx: #181715;
+  /* Darker champagne for small text: #b69a73 on ivory is only ~2.5:1. */
+  --color-champagne-deep: #7a6444;
+
+  /* Semantic roles */
+  --color-background: var(--color-ivory);
+  --color-foreground: var(--color-onyx);
+  --color-muted: var(--color-sand);
+  --color-muted-foreground: var(--color-mocha);
+  --color-primary: var(--color-onyx);
+  --color-primary-foreground: var(--color-ivory);
+  --color-accent: var(--color-champagne);
+  --color-accent-foreground: var(--color-onyx);
+  --color-border: color-mix(in oklab, var(--color-mocha) 18%, transparent);
+  --color-ring: var(--color-champagne-deep);
+  --color-destructive: #9b2c2c;
+
+  /* Typography */
+  --font-serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Motion */
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-fade-up: fade-up 0.7s var(--ease-luxe) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  html {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background-color: var(--color-champagne);
+    color: var(--color-onyx);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
